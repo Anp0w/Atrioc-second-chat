@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Atrioc's Second Stream Chat</title>
+    <style>
+      /* Basic styling */
+      body {
+        font-family: sans-serif;
+        background: #f2f2f2;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+      }
+      #chat-container {
+        max-width: 600px;
+        width: 100%;
+        margin: 50px 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      #messages {
+        list-style-type: none;
+        margin: 0;
+        padding: 20px;
+        height: 300px;
+        overflow-y: scroll;
+        border-bottom: 1px solid #ddd;
+      }
+      #messages li {
+        padding: 5px 10px;
+        border-bottom: 1px solid #eee;
+      }
+      #chat-form {
+        display: flex;
+      }
+      #chat-form input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-top: 1px solid #ddd;
+      }
+      #chat-form button {
+        padding: 10px 20px;
+        border: none;
+        background: #333;
+        color: #fff;
+        cursor: pointer;
+        border-top: 1px solid #ddd;
+      }
+      #chat-form button:hover {
+        background: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat-container">
+      <ul id="messages"></ul>
+      <form id="chat-form" action="">
+        <input id="username" placeholder="Your name (optional)" />
+        <input id="m" autocomplete="off" placeholder="Type your message here..." />
+        <button>Send</button>
+      </form>
+    </div>
+
+    <!-- Include Socket.IO client library -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // Connect to the Socket.IO server.
+      const socket = io();
+
+      const form = document.getElementById('chat-form');
+      const usernameInput = document.getElementById('username');
+      const messageInput = document.getElementById('m');
+      const messages = document.getElementById('messages');
+
+      // Send a message on form submit.
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = usernameInput.value || 'Anonymous';
+        const message = messageInput.value;
+        if (message) {
+          socket.emit('chat message', { username, message });
+          messageInput.value = '';
+        }
+      });
+
+      // Listen for messages from the server.
+      socket.on('chat message', function(msg) {
+        const item = document.createElement('li');
+        // Format the timestamp for display.
+        const time = new Date(msg.timestamp).toLocaleTimeString();
+        item.textContent = `[${time}] ${msg.username}: ${msg.message}`;
+        messages.appendChild(item);
+        messages.scrollTop = messages.scrollHeight;
+      });
+    </script>
+  </body>
+</html>
